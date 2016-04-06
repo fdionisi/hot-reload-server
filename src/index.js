@@ -35,8 +35,13 @@ export default function(webpackConfig, devMiddlewareConfig = {}) {
   app.use(webpackDevMiddleware(webpackCompiler, webpackConfig, devMiddlewareConfig));
   app.use(webpackHotMiddleware(webpackCompiler));
 
-  // Create static directories
-  app.use(path.basename(webpackConfig.output.path), express.static(webpackConfig.output.path));
+  // Create static directories for each config,
+  // when webpackConfig is an array
+  if (Array.isArray(webpackConfig)) webpackConfig.forEach(
+    config => app.use(path.basename(config.output.path), express.static(config.output.path))
+  )
+  // Otherwise act as normal (webpackConfig is an object)
+  else app.use(path.basename(webpackConfig.output.path), express.static(webpackConfig.output.path));
 
   return {
     /**
